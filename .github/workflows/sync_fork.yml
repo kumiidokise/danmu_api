@@ -2,11 +2,12 @@ name: Fork Sync
 
 permissions:
     contents: write
+    workflows: write
 
 on:
     schedule:
-        - cron: "0 0 * * *"  # 每天午夜执行
-    workflow_dispatch:  # 允许手动触发
+        - cron: "0 0 * * *"  # 每天执行一次
+    workflow_dispatch:      # 支持手动触发
 
 jobs:
     sync_with_upstream:
@@ -18,12 +19,12 @@ jobs:
             - name: Checkout target repo
               uses: actions/checkout@v4
               with:
-                token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.SYNC_FORK_TOKEN }}
 
             - name: Sync Upstream
-              uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+              uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.3
               with:
-                  target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+                  target_repo_token: ${{ secrets.SYNC_FORK_TOKEN }}
                   upstream_sync_repo: huangxd-/danmu_api
                   upstream_sync_branch: main
                   target_sync_branch: main
@@ -36,9 +37,5 @@ jobs:
             - name: Check for Failure
               if: failure()
               run: |
-                  echo "[Error] Sync failed. This might be due to:"
-                  echo "1. Changes in the upstream workflow file"
-                  echo "2. Merge conflicts that need manual resolution"
-                  echo "3. Network issues"
-                  echo "Please check the logs and consider manual sync if needed."
+                  echo "[Error] Sync failed. Please check the logs."
                   exit 1
